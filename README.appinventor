@@ -1,0 +1,14 @@
+The edits to i18n/create_messages.py are significant as they wrap the
+Blockly messages in functions that can be called by the App Inventor
+UI to set the right language. After resolving the conflicts on
+create_messages.py you will need to run the following command to
+regenerate all of the .js files for the language translations:
+
+```shell
+i18n/create_messages.py --source_lang_file msg/json/en.json \
+    --source_synonym_file msg/json/synonyms.json \
+    --source_constants_file msg/json/constants.json \
+    --output_dir msg/js/ --key_file msg/js/keys.json msg/json/*.json
+```
+
+Then commit the changed .js files over the Google versions.

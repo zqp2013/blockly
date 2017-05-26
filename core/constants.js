@@ -54,9 +54,15 @@ Blockly.LONGPRESS = 750;
 
 /**
  * Prevent a sound from playing if another sound preceded it within this many
- * miliseconds.
+ * milliseconds.
  */
 Blockly.SOUND_LIMIT = 100;
+
+/**
+ * When dragging a block out of a stack, split the stack in two (true), or drag
+ * out the block healing the stack (false).
+ */
+Blockly.DRAG_STACK = true;
 
 /**
  * The richness of block colours, regardless of the hue.
@@ -214,3 +220,19 @@ Blockly.DELETE_AREA_TRASH = 1;
  * @const
  */
 Blockly.DELETE_AREA_TOOLBOX = 2;
+
+/**
+ * String for use in the "custom" attribute of a category in toolbox xml.
+ * This string indicates that the category should be dynamically populated with
+ * variable blocks.
+ * @const {string}
+ */
+Blockly.VARIABLE_CATEGORY_NAME = 'VARIABLE';
+
+/**
+ * String for use in the "custom" attribute of a category in toolbox xml.
+ * This string indicates that the category should be dynamically populated with
+ * procedure blocks.
+ * @const {string}
+ */
+Blockly.PROCEDURE_CATEGORY_NAME = 'PROCEDURE';

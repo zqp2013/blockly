@@ -157,7 +157,6 @@ Blockly.Bubble.unbindDragEvents_ = function() {
  */
 Blockly.Bubble.bubbleMouseUp_ = function(/*e*/) {
   Blockly.Touch.clearTouchIdentifier();
-  Blockly.Css.setCursor(Blockly.Css.Cursor.OPEN);
   Blockly.Bubble.unbindDragEvents_();
 };
 
@@ -285,8 +284,6 @@ Blockly.Bubble.prototype.bubbleMouseDown_ = function(e) {
     return;
   }
   // Left-click (or middle click)
-  Blockly.Css.setCursor(Blockly.Css.Cursor.CLOSED);
-
   this.workspace_.startDrag(e, new goog.math.Coordinate(
       this.workspace_.RTL ? -this.relativeLeft_ : this.relativeLeft_,
       this.relativeTop_));
@@ -328,8 +325,6 @@ Blockly.Bubble.prototype.resizeMouseDown_ = function(e) {
     return;
   }
   // Left-click (or middle click)
-  Blockly.Css.setCursor(Blockly.Css.Cursor.CLOSED);
-
   this.workspace_.startDrag(e, new goog.math.Coordinate(
       this.workspace_.RTL ? -this.width_ : this.width_, this.height_));
 

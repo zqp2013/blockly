@@ -138,7 +138,6 @@ Blockly.Mutator.prototype.createEditor_ = function() {
   var flyoutSvg =  this.workspace_.addFlyout_('g');
   var background = this.workspace_.createDom('blocklyMutatorBackground');
 
-  // cherry-picked code from Blockly master commit f3c10d4ea
   // Insert the flyout after the <rect> but before the block canvas so that
   // the flyout is underneath in z-order.  This makes blocks layering during
   // dragging work properly.

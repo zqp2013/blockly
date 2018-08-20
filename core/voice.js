@@ -212,8 +212,10 @@ Blockly.Voice.flyoutCategory = function (workspace) {
 };
 
 /**
- * todo(jess): procedure callers are equivalent to slot 'getters'
- * Find all the callers of a named slot.
+ * Find all the callers of a named slot. 
+ * Procedure 'callers' are equivalent to slot 'getters'. 
+ * --> See Blockly.Procedures.getCallers
+ * 
  * @param {string} name Name of slot.
  * @param {!Blockly.Workspace} workspace The workspace to find callers in.
  * @return {!Array.<!Blockly.Block>} Array of caller blocks.
@@ -234,42 +236,43 @@ Blockly.Voice.getSlotGetters = function (name, workspace) {
     return callers;
 };
 
-// /** todo(jess): should only be relevant to parameters... del?
-//  * When a slot definition changes its parameters, find and edit all its
-//  * callers.
-//  * @param {!Blockly.Block} defBlock Procedure definition block.
-//  */
-// Blockly.Voice.mutateCallers = function (defBlock) {
-//     var oldRecordUndo = Blockly.Events.recordUndo;
-//     var name = defBlock.getSlotDef()[0];
-//     var xmlElement = defBlock.mutationToDom(true);
-//     var callers = Blockly.Voice.getSlotGetters(name, defBlock.workspace);
-//     for (var i = 0, caller; caller = callers[i]; i++) {
-//         var oldMutationDom = caller.mutationToDom();
-//         var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
-//         caller.domToMutation(xmlElement);
-//         var newMutationDom = caller.mutationToDom();
-//         var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
-//         if (oldMutation != newMutation) {
-//             // Fire a mutation on every caller block.  But don't record this as an
-//             // undo action since it is deterministically tied to the procedure's
-//             // definition mutation.
-//             Blockly.Events.recordUndo = false;
-//             Blockly.Events.fire(new Blockly.Events.Change(
-//                 caller, 'mutation', null, oldMutation, newMutation));
-//             Blockly.Events.recordUndo = oldRecordUndo;
-//         }
-//     }
-// };
+/**
+ * When a slot definition changes its parameters, find and edit all its
+ * callers. This is equivalent to procedures' Blockly.Procedures.mutateCallers 
+ * function.
+ * @param {!Blockly.Block} defBlock Slot definition block.
+ */
+Blockly.Voice.mutateGetters = function (defBlock) {
+    var oldRecordUndo = Blockly.Events.recordUndo;
+    var name = defBlock.getSlotDef()[0];
+    var xmlElement = defBlock.mutationToDom(true);
+    var callers = Blockly.Voice.getSlotGetters(name, defBlock.workspace);
+    for (var i = 0, caller; caller = callers[i]; i++) {
+        var oldMutationDom = caller.mutationToDom();
+        var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
+        caller.domToMutation(xmlElement);
+        var newMutationDom = caller.mutationToDom();
+        var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
+        if (oldMutation != newMutation) {
+            // Fire a mutation on every caller block.  But don't record this as an
+            // undo action since it is deterministically tied to the slot's
+            // definition mutation.
+            Blockly.Events.recordUndo = false;
+            Blockly.Events.fire(new Blockly.Events.Change(
+                caller, 'mutation', null, oldMutation, newMutation));
+            Blockly.Events.recordUndo = oldRecordUndo;
+        }
+    }
+};
 
 /**
- * Find the definition block for the named procedure.
- * @param {string} name Name of procedure.
+ * Find the definition block for the named slot.
+ * @param {string} name Name of slot.
  * @param {!Blockly.Workspace} workspace The workspace to search.
- * @return {Blockly.Block} The procedure definition block, or null not found.
+ * @return {Blockly.Block} The slot definition block, or null not found.
  */
 Blockly.Voice.getDefinition = function (name, workspace) {
-    // Assume that a procedure definition is a top block.
+    // Assume that a slot definition is a top block.
     var blocks = workspace.getTopBlocks(false);
     for (var i = 0; i < blocks.length; i++) {
         if (blocks[i].getSlotDef) {

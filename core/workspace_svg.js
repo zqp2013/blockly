@@ -521,16 +521,19 @@ Blockly.WorkspaceSvg.prototype.updateScreenCalculations_ = function() {
  * @package
  */
 Blockly.WorkspaceSvg.prototype.resizeContents = function() {
-  if (!this.resizesEnabled_ || !this.rendered) {
+  if (!this.resizesEnabled_ || !this.rendered || this.pendingResize_) {
     return;
   }
-  if (this.scrollbar) {
-    // TODO(picklesrus): Once rachel-fenichel's scrollbar refactoring
-    // is complete, call the method that only resizes scrollbar
-    // based on contents.
-    this.scrollbar.resize();
-  }
-  this.updateInverseScreenCTM();
+  this.pendingResize_ = setTimeout((function() {
+    if (this.scrollbar) {
+      // TODO(picklesrus): Once rachel-fenichel's scrollbar refactoring
+      // is complete, call the method that only resizes scrollbar
+      // based on contents.
+      this.scrollbar.resize();
+    }
+    this.updateInverseScreenCTM();
+    this.pendingResize_ = undefined;
+  }).bind(this));
 };
 
 /**
@@ -836,7 +839,7 @@ Blockly.WorkspaceSvg.prototype.paste = function(xmlBlock) {
   if (Blockly.Events.isEnabled() && !block.isShadow()) {
     Blockly.Events.fire(new Blockly.Events.Create(block));
   }
-  block.select();
+  return block;
 };
 
 /**
@@ -875,26 +878,18 @@ Blockly.WorkspaceSvg.prototype.recordDeleteAreas = function() {
  * Is the mouse event over a delete area (toolbox or non-closing flyout)?
  * Opens or closes the trashcan and sets the cursor as a side effect.
  * @param {!Event} e Mouse move event.
- * @return {boolean} True if event is in a delete area.
+ * @return {?number} Null if not over a delete area, or an enum representing
+ *     which delete area the event is over.
  */
 Blockly.WorkspaceSvg.prototype.isDeleteArea = function(e) {
   var xy = new goog.math.Coordinate(e.clientX, e.clientY);
-  if (this.deleteAreaTrash_) {
-    if (this.deleteAreaTrash_.contains(xy)) {
-      this.trashcan.setOpen_(true);
-      Blockly.Css.setCursor(Blockly.Css.Cursor.DELETE);
-      return true;
-    }
-    this.trashcan.setOpen_(false);
+  if (this.deleteAreaTrash_ && this.deleteAreaTrash_.contains(xy)) {
+    return Blockly.DELETE_AREA_TRASH;
   }
-  if (this.deleteAreaToolbox_) {
-    if (this.deleteAreaToolbox_.contains(xy)) {
-      Blockly.Css.setCursor(Blockly.Css.Cursor.DELETE);
-      return true;
-    }
+  if (this.deleteAreaToolbox_ && this.deleteAreaToolbox_.contains(xy)) {
+    return Blockly.DELETE_AREA_TOOLBOX;
   }
-  Blockly.Css.setCursor(Blockly.Css.Cursor.CLOSED);
-  return false;
+  return null;
 };
 
 /**
@@ -1677,6 +1672,15 @@ Blockly.WorkspaceSvg.prototype.registerButtonCallback = function(key, func) {
  */
 Blockly.WorkspaceSvg.prototype.getButtonCallback = function(key) {
   return this.flyoutButtonCallbacks_[key];
+};
+
+/**
+ * Convenience method to hide the scrollbars on the workspace. This method has
+ * no effect if the workspace's options had scrollbars set to false.
+ * @param {boolean} visible true to show the scrollbars, otherwise false.
+ */
+Blockly.WorkspaceSvg.prototype.setScrollbarsVisible = function(visible) {
+  this.scrollbar && this.scrollbar.setContainerVisible(visible)
 };
 
 // Export symbols that would otherwise be renamed by Closure compiler.

@@ -137,7 +137,12 @@ Blockly.Mutator.prototype.createEditor_ = function() {
   // To fix this, scale needs to be applied at a different level in the dom.
   var flyoutSvg =  this.workspace_.addFlyout_('g');
   var background = this.workspace_.createDom('blocklyMutatorBackground');
-  background.appendChild(flyoutSvg);
+
+  // cherry-picked code from Blockly master commit f3c10d4ea
+  // Insert the flyout after the <rect> but before the block canvas so that
+  // the flyout is underneath in z-order.  This makes blocks layering during
+  // dragging work properly.
+  background.insertBefore(flyoutSvg, this.workspace_.svgBlockCanvas_);
   this.svgDialog_.appendChild(background);
 
   return this.svgDialog_;
@@ -165,6 +170,16 @@ Blockly.Mutator.prototype.updateEditable = function() {
   // Default behaviour for an icon.
   Blockly.Icon.prototype.updateEditable.call(this);
 };
+
+Blockly.Mutator.prototype.scheduleResizeBubble = function() {
+  if (!this.pendingBubbleResize_) {
+    var self = this;
+    this.pendingBubbleResize_ = setTimeout(function() {
+      self.workspace_ && self.resizeBubble_();
+      self.pendingBubbleResize_ = undefined;
+    });
+  }
+}
 
 /**
  * Callback function triggered when the bubble has resized.
@@ -219,6 +234,8 @@ Blockly.Mutator.prototype.setVisible = function(visible) {
   Blockly.Events.fire(
       new Blockly.Events.Ui(this.block_, 'mutatorOpen', !visible, visible));
   if (visible) {
+    Blockly.Field.startCache();
+    Blockly.Events.disable();
     // Create the bubble.
     this.bubble_ = new Blockly.Bubble(
         /** @type {!Blockly.WorkspaceSvg} */ (this.block_.workspace),
@@ -230,10 +247,7 @@ Blockly.Mutator.prototype.setVisible = function(visible) {
     }
 
     this.rootBlock_ = this.block_.decompose(this.workspace_);
-    var blocks = this.rootBlock_.getDescendants();
-    for (var i = 0, child; child = blocks[i]; i++) {
-      child.render();
-    }
+    this.renderWorkspace();
     // The root block should not be dragable or deletable.
     this.rootBlock_.setMovable(false);
     this.rootBlock_.setDeletable(false);
@@ -261,6 +275,8 @@ Blockly.Mutator.prototype.setVisible = function(visible) {
     // When the mutator's workspace changes, update the source block.
     this.workspace_.addChangeListener(this.workspaceChanged_.bind(this));
     this.updateColour();
+    Blockly.Events.enable();
+    Blockly.Field.stopCache();
   } else {
     // Dispose of the bubble.
     this.svgDialog_ = null;
@@ -275,6 +291,16 @@ Blockly.Mutator.prototype.setVisible = function(visible) {
       this.block_.workspace.removeChangeListener(this.sourceListener_);
       this.sourceListener_ = null;
     }
+  }
+};
+
+/**
+ * Renders the mutator's workspace, starting from the root block.
+ */
+Blockly.Mutator.prototype.renderWorkspace = function() {
+  var blocks = this.rootBlock_.getDescendants();
+  for (var i = 0, child; child = blocks[i]; i++) {
+    child.render();
   }
 };
 
@@ -300,6 +326,7 @@ Blockly.Mutator.prototype.workspaceChanged_ = function() {
 
   // When the mutator's workspace changes, update the source block.
   if (this.rootBlock_.workspace == this.workspace_) {
+    Blockly.Field.startCache();
     Blockly.Events.setGroup(true);
     var block = this.block_;
     var oldMutationDom = block.mutationToDom();
@@ -329,8 +356,9 @@ Blockly.Mutator.prototype.workspaceChanged_ = function() {
     if (block.rendered) {
       block.render();
     }
-    this.resizeBubble_();
+    this.scheduleResizeBubble();
     Blockly.Events.setGroup(false);
+    Blockly.Field.stopCache();
   }
 };
 

@@ -665,8 +665,10 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
       var icons = descendant.getIcons();
       for (var j = 0; j < icons.length; j++) {
         var data = icons[j].getIconLocation();
-        data.bubble = icons[j];
-        this.draggedBubbles_.push(data);
+        if (data) {  // icons for collapsed blocks may not have locations
+          data.bubble = icons[j];
+          this.draggedBubbles_.push(data);
+        }
       }
     }
   }

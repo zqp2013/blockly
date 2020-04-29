@@ -768,7 +768,6 @@ Blockly.Flyout.prototype.show = function(xmlList) {
   }
 
   this.setVisible(true);
-  this.workspace_.rendered = false;
   // Create the blocks to be shown in this flyout.
   var contents = [];
   var gaps = [];
@@ -815,12 +814,6 @@ Blockly.Flyout.prototype.show = function(xmlList) {
       }
     }
   }
-  this.workspace_.rendered = true;
-  var blocks = goog.object.getValues(this.workspace_.blockDB_);
-  for (var i = 0; i < blocks.length; i++) {
-    blocks[i].initSvg();
-  }
-  this.workspace_.render();
 
   this.layout_(contents, gaps);
 
@@ -1209,6 +1202,19 @@ Blockly.Flyout.prototype.isDragTowardWorkspace_ = function(dx, dy) {
   return false;
 };
 
+// These changes mimic how core works on the latest version, and can be safely
+// removed during an upgrade.
+/**
+ * Returns if the flyout allows a new instance of the given block to be created.
+ * Used for deciding if a block can be "dragged out of" the flyout.
+ * By default all non-disabled blocks are creatable.
+ * @param {!Blockly.BlockSvg} block The block to copy from the flyout.
+ * @return {boolean} True if the flyout allows the block to be instantiated.
+ */
+Blockly.Flyout.prototype.isBlockCreatable_ = function(block) {
+  return !block.disabled;
+}
+
 /**
  * Create a copy of this block on the workspace.
  * @param {!Blockly.Block} originBlock The flyout block to copy.
@@ -1222,8 +1228,7 @@ Blockly.Flyout.prototype.createBlockFunc_ = function(originBlock) {
       // Right-click.  Don't create a block, let the context menu show.
       return;
     }
-    if (originBlock.disabled) {
-      // Beyond capacity.
+    if (!flyout.isBlockCreatable_(originBlock)) {
       return;
     }
     Blockly.Events.disable();

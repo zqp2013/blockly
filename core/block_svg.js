@@ -665,8 +665,10 @@ Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
       var icons = descendant.getIcons();
       for (var j = 0; j < icons.length; j++) {
         var data = icons[j].getIconLocation();
-        data.bubble = icons[j];
-        this.draggedBubbles_.push(data);
+        if (data) {  // icons for collapsed blocks may not have locations
+          data.bubble = icons[j];
+          this.draggedBubbles_.push(data);
+        }
       }
     }
   }
@@ -872,10 +874,14 @@ Blockly.BlockSvg.prototype.showContextMenu_ = function(e) {
       text: descendantCount == 1 ? Blockly.Msg.DELETE_BLOCK :
           Blockly.Msg.DELETE_X_BLOCKS.replace('%1', String(descendantCount)),
       enabled: true,
-      callback: function() {
-        Blockly.Events.setGroup(true);
-        block.dispose(true, true);
-        Blockly.Events.setGroup(false);
+      callback: function () {
+        Blockly.confirmDeletion(function (confirmedDelete) {
+          if (confirmedDelete) {
+            Blockly.Events.setGroup(true);
+            block.dispose(true, true);
+            Blockly.Events.setGroup(false);
+          }
+        });
       }
     };
     menuOptions.push(deleteOption);

@@ -29,8 +29,14 @@ Blockly.Connection = function(source, type) {
    * @protected
    */
   this.sourceBlock_ = source;
-  /** @type {number} */
-  this.type = type;
+  if (type == Blockly.INDENTED_VALUE) {
+      /** @type {number} */
+      this.type = Blockly.INPUT_VALUE;
+      /** @subtype {number} */
+      this.subtype = Blockly.INDENTED_VALUE;
+    } else {
+      this.type = type;
+    }
 };
 
 /**
@@ -600,12 +606,24 @@ Blockly.Connection.prototype.checkType = function(otherConnection) {
     // One or both sides are promiscuous enough that anything will fit.
     return true;
   }
-  // Find any intersection in the check lists.
+  // Find any intersection in the check lists,
+  // or if the check is a function, evaluate the function.
   for (var i = 0; i < this.check_.length; i++) {
-    if (otherConnection.check_.indexOf(this.check_[i]) != -1) {
+    if ((otherConnection.check_.indexOf(this.check_[i]) != -1) ||
+        (typeof this.check_[i] == "function" && this.check_[i](this,otherConnection))) {
       return true;
     }
   }
+
+  // If the check is a function on the other connection,
+  // evaluate the function to see if it evalutes to true.
+  for (var x = 0; x < otherConnection.check_.length; x++) {
+    if (typeof otherConnection.check_[x] == "function" &&
+        otherConnection.check_[x](otherConnection,this)) {
+      return true;
+    }
+  }
+
   // No intersection.
   return false;
 };

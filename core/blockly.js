@@ -50,6 +50,21 @@ Blockly.VERSION = 'uncompiled';
 Blockly.mainWorkspace = null;
 
 /**
+ * Workspace blocks arrangements
+ */
+Blockly.BLKS_HORIZONTAL = 0;
+Blockly.BLKS_VERTICAL = 1;
+Blockly.BLKS_CATEGORY = 2;
+
+/**
+ * Current Workspace arrangement state for position (horizontal or vertical),
+ * and for type (category)
+ */
+Blockly.workspace_arranged_position = null;
+Blockly.workspace_arranged_latest_position = null; //used to default to (previous is used for menus)
+Blockly.workspace_arranged_type = null;
+
+/**
  * Currently selected block.
  * @type {Blockly.Block}
  */
@@ -185,7 +200,19 @@ Blockly.onKeyDown = function(e) {
     return;
   }
 
-  var deleteBlock = false;
+  //Common code for delete and cut.
+  function deleteBlock() {
+    Blockly.Events.setGroup(true);
+    Blockly.hideChaff();
+    var heal = Blockly.dragMode_ != Blockly.DRAG_FREE;
+    Blockly.selected.dispose(heal, true);
+    if (Blockly.highlightedConnection_) {
+      Blockly.highlightedConnection_.unhighlight();
+      Blockly.highlightedConnection_ = null;
+    }
+    Blockly.Events.setGroup(false);
+  }
+
   if (e.keyCode == Blockly.utils.KeyCodes.ESC) {
     // Pressing esc closes the context menu.
     Blockly.hideChaff();
@@ -204,9 +231,11 @@ Blockly.onKeyDown = function(e) {
     if (Blockly.Gesture.inProgress()) {
       return;
     }
-    if (Blockly.selected && Blockly.selected.isDeletable()) {
-      deleteBlock = true;
-    }
+    Blockly.confirmDeletion(function(confirmedDelete) {
+      if (confirmedDelete) {
+        deleteBlock();
+      }
+    });
   } else if (e.altKey || e.ctrlKey || e.metaKey) {
     // Don't use meta keys during drags.
     if (Blockly.Gesture.inProgress()) {
@@ -226,7 +255,8 @@ Blockly.onKeyDown = function(e) {
         // 'x' for cut, but not in a flyout.
         // Don't even copy the selected item in the flyout.
         Blockly.copy_(Blockly.selected);
-        deleteBlock = true;
+        //deleteBlock = true;
+        deleteBlock();
       }
     }
     if (e.keyCode == Blockly.utils.KeyCodes.V) {
@@ -241,7 +271,8 @@ Blockly.onKeyDown = function(e) {
         if (Blockly.clipboardTypeCounts_ &&
             workspace.isCapacityAvailable(Blockly.clipboardTypeCounts_)) {
           Blockly.Events.setGroup(true);
-          workspace.paste(Blockly.clipboardXml_);
+          var block = workspace.paste(Blockly.clipboardXml_);
+          if (block) block.select();
           Blockly.Events.setGroup(false);
         }
       }
@@ -250,15 +281,6 @@ Blockly.onKeyDown = function(e) {
       Blockly.hideChaff();
       mainWorkspace.undo(e.shiftKey);
     }
-  }
-  // Common code for delete and cut.
-  // Don't delete in the flyout.
-  if (deleteBlock && !Blockly.selected.workspace.isFlyout) {
-    Blockly.Events.setGroup(true);
-    Blockly.hideChaff();
-    var selected = /** @type {!Blockly.BlockSvg} */ (Blockly.selected);
-    selected.dispose(/* heal */ true, true);
-    Blockly.Events.setGroup(false);
   }
 };
 
@@ -299,7 +321,8 @@ Blockly.duplicate = function(toDuplicate) {
 
   // Create a duplicate via a copy/paste operation.
   Blockly.copy_(toDuplicate);
-  toDuplicate.workspace.paste(Blockly.clipboardXml_);
+  var newBlock = toDuplicate.workspace.paste(Blockly.clipboardXml_);
+  if(newBlock) newBlock.select();
 
   // Restore the clipboard.
   Blockly.clipboardXml_ = clipboardXml;
@@ -364,16 +387,6 @@ Blockly.alert = function(message, opt_callback) {
   if (opt_callback) {
     opt_callback();
   }
-};
-
-/**
- * Wrapper to window.confirm() that app developers may override to
- * provide alternatives to the modal browser window.
- * @param {string} message The message to display to the user.
- * @param {!function(boolean)} callback The callback for handling user response.
- */
-Blockly.confirm = function(message, callback) {
-  callback(confirm(message));
 };
 
 /**

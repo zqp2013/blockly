@@ -26,6 +26,7 @@ goog.require('Blockly.Touch');
 goog.require('Blockly.utils');
 goog.require('Blockly.utils.Coordinate');
 goog.require('Blockly.utils.dom');
+goog.require('Blockly.utils.object');
 goog.require('Blockly.WorkspaceSvg');
 goog.require('Blockly.Xml');
 
@@ -141,6 +142,15 @@ Blockly.Flyout.prototype.CORNER_RADIUS = 8;
  */
 Blockly.Flyout.prototype.MARGIN = Blockly.Flyout.prototype.CORNER_RADIUS;
 
+/**
+ * Factor by which margin is multiplied to vertically separate blocks in flyout
+ * [lyn, 10/06/13] introduced so can change in flydown subclass.)
+ * @type {number}
+ * @const
+ */
+Blockly.Flyout.prototype.VERTICAL_SEPARATION_FACTOR = 2;
+
+
 // TODO: Move GAP_X and GAP_Y to their appropriate files.
 
 /**
@@ -148,14 +158,14 @@ Blockly.Flyout.prototype.MARGIN = Blockly.Flyout.prototype.CORNER_RADIUS;
  * element.
  * @const {number}
  */
-Blockly.Flyout.prototype.GAP_X = Blockly.Flyout.prototype.MARGIN * 3;
+Blockly.Flyout.prototype.GAP_X = Blockly.Flyout.prototype.MARGIN * Blockly.Flyout.prototype.VERTICAL_SEPARATION_FACTOR;
 
 /**
  * Gap between items in vertical flyouts. Can be overridden with the "sep"
  * element.
  * @const {number}
  */
-Blockly.Flyout.prototype.GAP_Y = Blockly.Flyout.prototype.MARGIN * 3;
+Blockly.Flyout.prototype.GAP_Y = Blockly.Flyout.prototype.MARGIN * Blockly.Flyout.prototype.VERTICAL_SEPARATION_FACTOR;
 
 /**
  * Top/bottom padding between scrollbar and edge of flyout background.
@@ -223,6 +233,11 @@ Blockly.Flyout.prototype.createDom = function(tagName) {
   this.workspace_.getThemeManager().subscribe(
       this.svgBackground_, 'flyoutOpacity', 'fill-opacity');
   this.workspace_.getMarkerManager().setCursor(new Blockly.FlyoutCursor());
+  Array.prototype.push.apply(this.eventWrappers_,
+      Blockly.bindEvent_(this.svgGroup_, 'wheel', this, this.wheel_));
+  // Dragging the flyout up and down.
+  Array.prototype.push.apply(this.eventWrappers_,
+      Blockly.bindEvent_(this.svgGroup_, 'mousedown', this, this.onMouseDown_));
   return this.svgGroup_;
 };
 
@@ -367,7 +382,9 @@ Blockly.Flyout.prototype.updateDisplay_ = function() {
   this.svgGroup_.style.display = show ? 'block' : 'none';
   // Update the scrollbar's visibility too since it should mimic the
   // flyout's visibility.
-  this.scrollbar_.setContainerVisible(show);
+  if (this.scrollbar_) {
+    this.scrollbar_.setContainerVisible(show);
+  }
 };
 
 /**
@@ -410,10 +427,17 @@ Blockly.Flyout.prototype.hide = function() {
   if (!this.isVisible()) {
     return;
   }
+  if (Blockly.mainWorkspace && !this.targetWorkspace_.isMutator) {
+    Blockly.mainWorkspace.setScrollbarsVisible(true);
+  }
   this.setVisible(false);
   // Delete all the event listeners.
   for (var i = 0, listen; (listen = this.listeners_[i]); i++) {
-    Blockly.unbindEvent_(listen);
+    try {
+      Blockly.unbindEvent_(listen);
+    } catch(e) {
+      console.warn('Unable to unbind event listener during flyout.hide()', e);
+    }
   }
   this.listeners_.length = 0;
   if (this.reflowWrapper_) {
@@ -430,6 +454,9 @@ Blockly.Flyout.prototype.hide = function() {
  *     Variables and procedures have a custom set of blocks.
  */
 Blockly.Flyout.prototype.show = function(xmlList) {
+  if (Blockly.mainWorkspace && !this.targetWorkspace_.isMutator) {
+    Blockly.mainWorkspace.setScrollbarsVisible(false);  // hide parent's scrollbars
+  }
   this.workspace_.setResizesEnabled(false);
   this.hide();
   this.clearOldBlocks_();
@@ -451,6 +478,7 @@ Blockly.Flyout.prototype.show = function(xmlList) {
   }
 
   this.setVisible(true);
+  this.workspace_.rendered = false;
   // Create the blocks to be shown in this flyout.
   var contents = [];
   var gaps = [];
@@ -462,17 +490,22 @@ Blockly.Flyout.prototype.show = function(xmlList) {
     }
     switch (xml.tagName.toUpperCase()) {
       case 'BLOCK':
-        var curBlock = Blockly.Xml.domToBlock(xml, this.workspace_);
-        if (!curBlock.isEnabled()) {
+        try {
+          var curBlock = Blockly.Xml.domToBlock(xml, this.workspace_);
+
+          if (!curBlock.isEnabled()) {
+          }
           // Record blocks that were initially disabled.
           // Do not enable these blocks as a result of capacity filtering.
           this.permanentlyDisabled_.push(curBlock);
+          contents.push({type: 'block', block: curBlock});
+          // This is a deprecated method for adding gap to a block.
+          // <block type="math_arithmetic" gap="8"></block>
+          var gap = parseInt(xml.getAttribute('gap'), 10);
+          gaps.push(isNaN(gap) ? default_gap : gap);
+        } catch(e) {
+          console.error(e);
         }
-        contents.push({type: 'block', block: curBlock});
-        // This is a deprecated method for adding gap to a block.
-        // <block type="math_arithmetic" gap="8"></block>
-        var gap = parseInt(xml.getAttribute('gap'), 10);
-        gaps.push(isNaN(gap) ? default_gap : gap);
         break;
       case 'SEP':
         // Change the gap between two toolbox elements.
@@ -501,6 +534,12 @@ Blockly.Flyout.prototype.show = function(xmlList) {
     }
   }
 
+  this.workspace_.rendered = true;
+  var blocks = Blockly.utils.object.getValues(this.workspace_.blockDB_);
+  for (var i = 0; i < blocks.length; i++) {
+    blocks[i].initSvg();
+  }
+  this.workspace_.render();
   this.layout_(contents, gaps);
 
   // IE 11 is an incompetent browser that fails to fire mouseout events.
@@ -558,7 +597,7 @@ Blockly.Flyout.prototype.clearOldBlocks_ = function() {
     button.dispose();
   }
   this.buttons_.length = 0;
-
+  this.lastBlockCreated = null;
   // Clear potential variables from the previous showing.
   this.workspace_.getPotentialVariableMap().clear();
 };
@@ -641,6 +680,10 @@ Blockly.Flyout.prototype.createBlock = function(originalBlock) {
   this.targetWorkspace_.setResizesEnabled(false);
   try {
     newBlock = this.placeNewBlock_(originalBlock);
+    if (this.autoClose) {
+      // save this block as the last created block for this instantiation of the flyout
+      this.lastBlockCreated = block;
+    }
     // Close the flyout.
     Blockly.hideChaff();
   } finally {

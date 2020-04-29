@@ -208,6 +208,7 @@ Blockly.ZoomControls.prototype.createZoomOutSvg_ = function(rnd) {
       this.zoomOutGroup_);
   zoomoutSvg.setAttributeNS(Blockly.utils.dom.XLINK_NS, 'xlink:href',
       ws.options.pathToMedia + Blockly.SPRITE.url);
+  zoomoutSvg.setAttribute('class', 'blocklyZoomButton');
 
   // Attach listener.
   Blockly.bindEventWithChecks_(zoomoutSvg, 'mousedown', null, function(e) {
@@ -261,7 +262,7 @@ Blockly.ZoomControls.prototype.createZoomInSvg_ = function(rnd) {
       this.zoomInGroup_);
   zoominSvg.setAttributeNS(Blockly.utils.dom.XLINK_NS, 'xlink:href',
       ws.options.pathToMedia + Blockly.SPRITE.url);
-
+  zoomoinSvg.setAttribute('class', 'blocklyZoomButton');
   // Attach listener.
   Blockly.bindEventWithChecks_(zoominSvg, 'mousedown', null, function(e) {
     ws.markFocused();
@@ -307,13 +308,14 @@ Blockly.ZoomControls.prototype.createZoomResetSvg_ = function(rnd) {
       {
         'width': Blockly.SPRITE.width,
         'height': Blockly.SPRITE.height,
-        'y': -92,
+        'x': 1,
+        'y': -93,
         'clip-path': 'url(#blocklyZoomresetClipPath' + rnd + ')'
       },
       this.zoomResetGroup_);
   zoomresetSvg.setAttributeNS(Blockly.utils.dom.XLINK_NS, 'xlink:href',
       ws.options.pathToMedia + Blockly.SPRITE.url);
-
+  zoomresetSvg.setAttribute('class', 'blocklyZoomButton');
   // Attach event listeners.
   Blockly.bindEventWithChecks_(zoomresetSvg, 'mousedown', null, function(e) {
     ws.markFocused();

@@ -11,6 +11,14 @@
 'use strict';
 
 /**
+ * [lyn, 10/10/13]
+ * + Added CSS tags blocklyFieldParameter and blocklyFieldParameterFlydown
+ *   to control parameter flydowns.
+ * + Added CSS tags blocklyFieldProcedure and blocklyFieldProcedureFlydown
+ *   to control procedure flydowns.
+ */
+
+/**
  * @name Blockly.Css
  * @namespace
  */
@@ -69,7 +77,7 @@ Blockly.Css.inject = function(hasCss, pathToMedia) {
   cssNode.id = 'blockly-common-style';
   var cssTextNode = document.createTextNode(text);
   cssNode.appendChild(cssTextNode);
-  document.head.insertBefore(cssNode, document.head.firstChild);
+  document.head.appendChild(cssNode);
 };
 
 /**
@@ -101,6 +109,75 @@ Blockly.Css.CONTENT = [
     'position: absolute;',
     'z-index: 99999;', /* big value for bootstrap3 compatibility */
   '}',
+
+  '/*',
+  ' * [lyn, 10/08/13] Control parameter fields with flydown getter/setter blocks.',
+  ' * Brightening factors for variable color rgb(208,95,45):',
+  ' * 10%: rgb(212, 111, 66)',
+  ' * 20%: rgb(217, 127, 87)',
+  ' * 30%: rgb(222, 143, 108)',
+  ' * 40%: rgb(226, 159, 129)',
+  ' * 50%: rgb(231, 175, 150)',
+  ' * 60%: rgb(236, 191, 171)',
+  ' * 70%: rgb(240, 207, 192)',
+  ' * 80%: rgb(245, 223, 213)',
+  ' * 90%: rgb(250, 239, 234)',
+  ' */',
+  '.blocklyFieldParameter>rect {',
+  '  /* fill: rgb(231,175,150);*/ /* This looks too much like getter/setter var */',
+  '  fill: rgb(222, 143, 108);',
+  '  fill-opacity: 1.0;',
+  '  stroke-width: 2;',
+  '  stroke: rgb(231, 175, 150);',
+  '}',
+  '.blocklyFieldParameter>text {',
+  ' /* fill: #000; */ /* Use white rather than black on dark orange */',
+  '  stroke-width: 1;',
+  '  fill: #000;',
+  '}',
+  '.blocklyFieldParameter:hover>rect {',
+  '  stroke-width: 2;',
+  '  stroke: rgb(231,175,150);',
+  '  fill: rgb(231,175,150);',
+  '  fill-opacity: 1.0;',
+  '}',
+  '/*',
+  ' * [lyn, 10/08/13] Control flydown with the getter/setter blocks.',
+  ' */',
+  '.blocklyFieldParameterFlydown {',
+  '  fill: rgb(231,175,150);',
+  '  fill-opacity: 0.8;',
+  '}',
+  '/*',
+  ' * [lyn, 10/08/13] Control parameter fields with flydown procedure caller block.',
+  ' */',
+  '.blocklyFieldProcedure>rect {',
+  '  /*  rgb(231,175,150) is procedure color rgb(124,83,133) brightened by 70% */',
+  '  fill: rgb(215,203,218);',
+  '  fill-opacity: 1.0;',
+  '  stroke-width: 0;',
+  '  stroke: #000;',
+  '}',
+  '.blocklyFieldProcedure>text {',
+  '  fill: #000;',
+  '}',
+  '.blocklyFieldProcedure:hover>rect {',
+  '  stroke-width: 2;',
+  '  stroke: #fff;',
+  '  fill: rgb(215,203,218);',
+  '  fill-opacity: 1.0;',
+  '}',
+  '/*',
+  ' * [lyn, 10/08/13] Control flydown with the procedure caller block.',
+  ' */',
+  '.blocklyFieldProcedureFlydown {',
+  '  fill: rgb(215,203,218);',
+  '  fill-opacity: 0.8;',
+  '}',
+  '/*',
+  ' * Don\'t allow users to select text.  It gets annoying when trying to',
+  ' * drag a block and selected text moves instead.',
+  ' */',
 
   '.injectionDiv {',
     'height: 100%;',
@@ -285,6 +362,15 @@ Blockly.Css.CONTENT = [
     'cursor: url("<<<PATH>>>/handdelete.cur"), auto;',
   '}',
 
+  '.badBlock>.blocklyPath {',
+    '  stroke-width: 3px;',
+    '  stroke: #f00;',
+  '}',
+
+  '.badBlock>.blocklyPathLight {',
+    '  display: none;',
+  '}',
+
   '.blocklyDragging>.blocklyPath,',
   '.blocklyDragging>.blocklyPathLight {',
     'fill-opacity: .8;',
@@ -338,6 +424,15 @@ Blockly.Css.CONTENT = [
     '-ms-user-select: none;',
     '-webkit-user-select: none;',
     'cursor: inherit;',
+  '}',
+
+  '/*',
+  ' * Selecting text for Errors and Warnings is allowed though.',
+  ' */',
+  '.blocklySvg text.blocklyErrorWarningText {',
+    '  -moz-user-select: text;',
+    '  -webkit-user-select: text;',
+    '  user-select: text;',
   '}',
 
   '.blocklyHidden {',
@@ -397,10 +492,49 @@ Blockly.Css.CONTENT = [
     'stroke: #c6c6c6;',  /* Equates to #ddd due to border being off-pixel. */
   '}',
 
+  '.blocklyContextMenuBackground,',
+
   '.blocklyMutatorBackground {',
     'fill: #fff;',
     'stroke: #ddd;',
     'stroke-width: 1;',
+  '}',
+
+  '.blocklyContextMenuOptions>.blocklyMenuDiv,',
+  '.blocklyContextMenuOptions>.blocklyMenuDivDisabled,',
+  '.blocklyDropdownMenuOptions>.blocklyMenuDiv {',
+    '  fill: #fff;',
+  '}',
+
+  '.blocklyContextMenuOptions>.blocklyMenuDiv:hover>rect,',
+
+  '.blocklyDropdownMenuOptions>.blocklyMenuDiv:hover>rect {',
+    '  fill: #57e;',
+  '}',
+
+  '.blocklyMenuSelected>rect {',
+    '  fill: #57e;',
+  '}',
+
+  '.blocklyMenuText {',
+    '  cursor: default !important;',
+    '  font-family: sans-serif;',
+    '  font-size: 15px; /* All context menu sizes are based on pixels. */',
+    '  fill: #000;',
+  '}',
+
+  '.blocklyContextMenuOptions>.blocklyMenuDiv:hover>.blocklyMenuText,',
+
+  '.blocklyDropdownMenuOptions>.blocklyMenuDiv:hover>.blocklyMenuText {',
+    '  fill: #fff;',
+  '}',
+
+  '.blocklyMenuSelected>.blocklyMenuText {',
+    '  fill: #fff;',
+  '}',
+
+  '.blocklyMenuDivDisabled>.blocklyMenuText {',
+    '  fill: #ccc;',
   '}',
 
   '.blocklyFlyoutBackground {',
@@ -427,6 +561,18 @@ Blockly.Css.CONTENT = [
 
   '.blocklyScrollbarHandle {',
     'fill: #ccc;',
+  '}',
+
+  '.blocklyZoom>image {',
+    'opacity: 0.9;',
+  '}',
+
+  '.blocklyZoom>image:hover {',
+    'opacity: 1;',
+  '}',
+
+  '.blocklyZoom>image:active {',
+    'opacity: 1;',
   '}',
 
   '.blocklyScrollbarBackground:hover+.blocklyScrollbarHandle,',

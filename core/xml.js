@@ -599,10 +599,11 @@ Blockly.Xml.domToVariables = function(xmlVariables, workspace) {
  * workspace.
  * @param {!Element} xmlBlock XML block element.
  * @param {!Blockly.Workspace} workspace The workspace.
+  * @param {?number} opt_typeHint optional type hint from parent block
  * @return {!Blockly.Block} The root block created.
  * @private
  */
-Blockly.Xml.domToBlockHeadless_ = function(xmlBlock, workspace) {
+Blockly.Xml.domToBlockHeadless_ = function(xmlBlock, workspace, opt_typeHint) {
   var block = null;
   var prototypeName = xmlBlock.getAttribute('type');
   if (!prototypeName) {
@@ -637,15 +638,31 @@ Blockly.Xml.domToBlockHeadless_ = function(xmlBlock, workspace) {
     }
 
     var name = xmlChild.getAttribute('name');
+    var typeHint = Blockly.NEXT_STATEMENT;
     var xmlChildElement = /** @type {!Element} */ (xmlChild);
     switch (xmlChild.nodeName.toLowerCase()) {
       case 'mutation':
         // Custom data for an advanced block.
         if (block.domToMutation) {
           block.domToMutation(xmlChildElement);
-          if (block.initSvg) {
-            // Mutation may have added some elements that need initializing.
-            block.initSvg();
+            /* disabling due to this being _headless_
+            if (block.initSvg) {
+              // Mutation may have added some elements that need initializing.
+              block.initSvg();
+            }
+            */
+        }
+        if (block.type == 'component_method' && block.getMethodTypeObject &&
+            block.getMethodTypeObject() == undefined && opt_typeHint != undefined) {
+          switch (opt_typeHint) {
+            case Blockly.INPUT_VALUE:
+              block.setOutput(true, null);
+              break;
+            case Blockly.NEXT_STATEMENT:
+            default:
+              block.setNextStatement(true, null);
+              block.setPreviousStatement(true, null);
+              break;
           }
         }
         break;
@@ -682,23 +699,45 @@ Blockly.Xml.domToBlockHeadless_ = function(xmlBlock, workspace) {
         Blockly.Xml.domToField_(block, name, xmlChildElement);
         break;
       case 'value':
+        typeHint = Blockly.INPUT_VALUE;
       case 'statement':
         input = block.getInput(name);
+
         if (!input) {
-          console.warn('Ignoring non-existent input ' + name + ' in block ' +
-                       prototypeName);
-          break;
+          // Handle undefined method params due to extension upgrading
+          if (block.type == 'component_method' && block.getMethodTypeObject &&
+              !block.getMethodTypeObject()) {
+            input = block.appendValueInput(name).appendField(name.toLowerCase());
+            input.setAlign(Blockly.ALIGN_RIGHT)
+          } else {
+            console.warn('Ignoring non-existent input ' + name + ' in block ' +
+              prototypeName);
+            break;
+          }
         }
         if (childShadowElement) {
           input.connection.setShadowDom(childShadowElement);
         }
         if (childBlockElement) {
           blockChild = Blockly.Xml.domToBlockHeadless_(childBlockElement,
-              workspace);
+              workspace, typeHint);
           if (blockChild.outputConnection) {
             input.connection.connect(blockChild.outputConnection);
           } else if (blockChild.previousConnection) {
             input.connection.connect(blockChild.previousConnection);
+          } else if (blockChild.type == 'component_method' && blockChild.getMethodTypeObject
+              && !blockChild.getMethodTypeObject()) {
+            // The method is no longer defined (likely due to an upgrade) so attempt to repair.
+            if (blockChild.badBlock) blockChild.badBlock();
+            // try to heal the block
+            if (xmlChild.tagName.toLowerCase() == 'value') {
+              blockChild.setOutput(true, null);
+              input.connection.connect(blockChild.outputConnection);
+            } else {
+              blockChild.setPreviousStatement(true, null);
+              blockChild.setNextStatement(true, null);
+              input.connection.connect(blockChild.previousConnection);
+            }
           } else {
             throw TypeError(
                 'Child block does not have output or previous statement.');
@@ -718,11 +757,21 @@ Blockly.Xml.domToBlockHeadless_ = function(xmlBlock, workspace) {
             throw TypeError('Next statement is already connected.');
           }
           blockChild = Blockly.Xml.domToBlockHeadless_(childBlockElement,
-              workspace);
-          if (!blockChild.previousConnection) {
-            throw TypeError('Next block does not have previous statement.');
-          }
-          block.nextConnection.connect(blockChild.previousConnection);
+             workspace, Blockly.NEXT_STATEMENT);
+           // Attempt to heal a missing method block to prevent assertion errors.
+           if (!blockChild.previousConnection && blockChild.type == 'component_method' &&
+               blockChild.getMethodTypeObject && !blockChild.getMethodTypeObject()) {
+             blockChild.badBlock();
+             blockChild.setDisabled(true);
+             // try to heal the block
+             blockChild.setPreviousStatement(true, null);
+             blockChild.setNextStatement(true, null);
+             block.nextConnection.connect(blockChild.previousConnection);
+           } else {
+             goog.asserts.assert(blockChild.previousConnection,
+                 'Next block does not have previous statement.');
+             block.nextConnection.connect(blockChild.previousConnection);
+           }
         }
         break;
       default:

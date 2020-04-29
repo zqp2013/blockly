@@ -146,6 +146,11 @@ Blockly.Options = function(options) {
    * @type {Blockly.Workspace}
    */
   this.parentWorkspace = options['parentWorkspace'];
+
+  // AppInventor configuration
+  this.configForTypeBlock = options['configForTypeBlock'] !== undefined ? options['configForTypeBlock'] : null;
+  this.hasBackpack = !!options['backpack'];
+  this.enableWarningIndicator = !!options['warningIndicator'];
 };
 
 /**

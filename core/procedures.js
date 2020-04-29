@@ -107,6 +107,7 @@ Blockly.Procedures.findLegalName = function(name, block) {
     // Flyouts can have multiple procedures called 'do something'.
     return name;
   }
+  name = name.replace(/\s+/g, '');
   name = name || Blockly.Msg['UNNAMED_KEY'] || 'unnamed';
   while (!Blockly.Procedures.isLegalName_(name, block.workspace, block)) {
     // Collision with another procedure.

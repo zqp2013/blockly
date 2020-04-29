@@ -48,7 +48,7 @@ Blockly.inject = function(container, opt_options) {
   if (!container || !Blockly.utils.dom.containsNode(document, container)) {
     throw Error('Error: container is not in current document.');
   }
-  var options = new Blockly.Options(opt_options ||
+  var options = (Blockly.mainWorkspace && Blockly.mainWorkspace.options) || new Blockly.Options(opt_options ||
     (/** @type {!Blockly.BlocklyOptions} */ ({})));
   var subContainer = document.createElement('div');
   subContainer.className = 'injectionDiv';
@@ -149,7 +149,7 @@ Blockly.createMainWorkspace_ = function(svg, options, blockDragSurface,
     workspaceDragSurface) {
   options.parentWorkspace = null;
   var mainWorkspace =
-      new Blockly.WorkspaceSvg(options, blockDragSurface, workspaceDragSurface);
+      Blockly.mainWorkspace || new Blockly.WorkspaceSvg(options, blockDragSurface, workspaceDragSurface);
   var wsOptions = mainWorkspace.options;
   mainWorkspace.scale = wsOptions.zoomOptions.startScale;
   svg.appendChild(mainWorkspace.createDom('blocklyMainBackground'));

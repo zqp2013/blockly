@@ -160,6 +160,12 @@ Blockly.Events.BUMP_EVENTS = [
  * @private
  */
 Blockly.Events.FIRE_QUEUE_ = [];
+/**
+ * Pending timeout, if any, for event firing.
+ * @type {?number}
+ * @private
+ */
+Blockly.Events.FIRE_TIMER_ = undefined;
 
 /**
  * Create a custom event and fire it.
@@ -169,11 +175,14 @@ Blockly.Events.fire = function(event) {
   if (!Blockly.Events.isEnabled()) {
     return;
   }
-  if (!Blockly.Events.FIRE_QUEUE_.length) {
-    // First event added; schedule a firing of the event queue.
-    setTimeout(Blockly.Events.fireNow_, 0);
-  }
   Blockly.Events.FIRE_QUEUE_.push(event);
+  if (!Blockly.Events.FIRE_TIMER_) {
+    // First event added; schedule a firing of the event queue.
+    Blockly.Events.FIRE_TIMER_ = setTimeout(function() {
+      Blockly.Events.FIRE_TIMER_ = undefined;
+      Blockly.Events.fireNow_();
+    });
+  }
 };
 
 /**

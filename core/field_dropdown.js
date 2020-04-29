@@ -751,5 +751,20 @@ Blockly.FieldDropdown.prototype.onBlocklyAction = function(action) {
   return Blockly.FieldDropdown.superClass_.onBlocklyAction.call(this, action);
 };
 
+/**
+ * Lookup function to traverse OPERATORS structures (Array of Arrays) to return a human readable
+ * representation of a particular Operator
+ * @param {Array} a nested array with Operators and their 'readable' form
+ * @param {String} the value to look up
+ * @return {String} the value of the Operator to display to users
+ */
+Blockly.FieldDropdown.lookupOperator = function(operatorsArray, value){
+  var arrLength = operatorsArray.length;
+  for (var i = 0; i < arrLength; i++){
+    if (operatorsArray[i][1] === value)
+      return operatorsArray[i][0];
+  }
+  throw new Error('value: ' + value + ' not found in OPERATOR: ' + operatorsArray);
+};
 
 Blockly.fieldRegistry.register('field_dropdown', Blockly.FieldDropdown);

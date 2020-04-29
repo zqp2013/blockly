@@ -960,13 +960,19 @@ Blockly.WorkspaceSvg.prototype.updateScreenCalculations_ = function() {
  * @package
  */
 Blockly.WorkspaceSvg.prototype.resizeContents = function() {
-  if (!this.resizesEnabled_ || !this.rendered) {
+  if (!this.resizesEnabled_ || !this.rendered || this.pendingResize_) {
     return;
   }
-  if (this.scrollbar) {
-    this.scrollbar.resize();
-  }
-  this.updateInverseScreenCTM();
+  this.pendingResize_ = setTimeout((function() {
+    if (this.scrollbar) {
+      // TODO(picklesrus): Once rachel-fenichel's scrollbar refactoring
+      // is complete, call the method that only resizes scrollbar
+      // based on contents.
+      this.scrollbar.resize();
+    }
+    this.updateInverseScreenCTM();
+    this.pendingResize_ = undefined;
+  }).bind(this));
 };
 
 /**
@@ -1268,9 +1274,9 @@ Blockly.WorkspaceSvg.prototype.paste = function(xmlBlock) {
     this.currentGesture_.cancel();  // Dragging while pasting?  No.
   }
   if (xmlBlock.tagName.toLowerCase() == 'comment') {
-    this.pasteWorkspaceComment_(xmlBlock);
+    return this.pasteWorkspaceComment_(xmlBlock);
   } else {
-    this.pasteBlock_(xmlBlock);
+    return this.pasteBlock_(xmlBlock);
   }
 };
 
@@ -1343,7 +1349,7 @@ Blockly.WorkspaceSvg.prototype.pasteBlock_ = function(xmlBlock) {
   if (Blockly.Events.isEnabled() && !block.isShadow()) {
     Blockly.Events.fire(new Blockly.Events.BlockCreate(block));
   }
-  block.select();
+  return block;
 };
 
 /**
@@ -1377,7 +1383,7 @@ Blockly.WorkspaceSvg.prototype.pasteWorkspaceComment_ = function(xmlComment) {
   if (Blockly.Events.isEnabled()) {
     // TODO: Fire a Workspace Comment Create event.
   }
-  comment.select();
+  return comment;
 };
 
 /**
@@ -1793,18 +1799,19 @@ Blockly.WorkspaceSvg.prototype.showContextMenu = function(e) {
       if (deleteList.length < 2 ) {
         deleteNext();
       } else {
-        Blockly.confirm(
-            Blockly.Msg['DELETE_ALL_BLOCKS'].replace('%1', deleteList.length),
-            function(ok) {
-              if (ok) {
-                deleteNext();
-              }
-            });
+        Blockly.confirmDeletion(function(confirmedDelete) {
+          if (confirmedDelete) {
+            deleteNext();
+          }
+        });
       }
     }
   };
   menuOptions.push(deleteOption);
 
+ if (this.customContextMenu) {
+    this.customContextMenu(menuOptions);
+  }
   // Allow the developer to add or modify menuOptions.
   if (this.configureContextMenu) {
     this.configureContextMenu(menuOptions, e);
@@ -2541,6 +2548,15 @@ Blockly.WorkspaceSvg.prototype.getButtonCallback = function(key) {
  */
 Blockly.WorkspaceSvg.prototype.removeButtonCallback = function(key) {
   this.flyoutButtonCallbacks_[key] = null;
+};
+
+/**
+ * Convenience method to hide the scrollbars on the workspace. This method has
+ * no effect if the workspace's options had scrollbars set to false.
+ * @param {boolean} visible true to show the scrollbars, otherwise false.
+ */
+Blockly.WorkspaceSvg.prototype.setScrollbarsVisible = function(visible) {
+  this.scrollbar && this.scrollbar.setContainerVisible(visible)
 };
 
 /**

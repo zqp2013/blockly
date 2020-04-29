@@ -370,7 +370,7 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
   }
   // If we are losing a parent, we want to move our DOM element to the
   // root of the workspace.
-  else if (oldParent) {
+  else if (oldParent && this.workspace.getCanvas()) {
     this.workspace.getCanvas().appendChild(svgRoot);
     this.translate(oldXY.x, oldXY.y);
   }
@@ -791,6 +791,20 @@ Blockly.BlockSvg.prototype.generateContextMenu = function() {
       menuOptions.push(disableOption);
     }
 
+    // Option to copy to backpack.
+    var backpackOption = {
+      enabled:true,
+      text: Blockly.Msg.COPY_TO_BACKPACK +
+        " (" + Blockly.getMainWorkspace().backpack_.count() + ")",
+      callback: function() {
+        if (Blockly.selected && Blockly.selected.isDeletable() &&
+            Blockly.selected.workspace == Blockly.mainWorkspace) {
+          Blockly.getMainWorkspace().getBackpack().addToBackpack(Blockly.selected, true);
+        }
+      }
+    };
+    menuOptions.push(backpackOption);
+
     if (this.isDeletable()) {
       menuOptions.push(Blockly.ContextMenu.blockDeleteOption(block));
     }
@@ -803,6 +817,9 @@ Blockly.BlockSvg.prototype.generateContextMenu = function() {
     this.customContextMenu(menuOptions);
   }
 
+  if (this.flyoutCustomContextMenu && this.isInFlyout) {
+    this.flyoutCustomContextMenu(menuOptions);
+  }
   return menuOptions;
 };
 

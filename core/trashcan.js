@@ -163,14 +163,14 @@ Blockly.Trashcan.ANIMATION_FRAMES_ = 4;
  * @const {number}
  * @private
  */
-Blockly.Trashcan.OPACITY_MIN_ = 0.4;
+Blockly.Trashcan.OPACITY_MIN_ = 0.9;
 
 /**
  * The maximum (hovered) opacity of the trashcan and lid.
  * @const {number}
  * @private
  */
-Blockly.Trashcan.OPACITY_MAX_ = 0.8;
+Blockly.Trashcan.OPACITY_MAX_ = 1.0;
 
 /**
  * The maximum angle the trashcan lid can opens to. At the end of the open

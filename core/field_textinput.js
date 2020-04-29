@@ -438,6 +438,7 @@ Blockly.FieldTextInput.prototype.unbindInputEvents_ = function() {
  */
 Blockly.FieldTextInput.prototype.onHtmlInputKeyDown_ = function(e) {
   if (e.keyCode == Blockly.utils.KeyCodes.ENTER) {
+    this.setValue(this.getText());
     Blockly.WidgetDiv.hide();
     Blockly.DropDownDiv.hideWithoutAnimation();
   } else if (e.keyCode == Blockly.utils.KeyCodes.ESC) {
@@ -445,6 +446,7 @@ Blockly.FieldTextInput.prototype.onHtmlInputKeyDown_ = function(e) {
     Blockly.WidgetDiv.hide();
     Blockly.DropDownDiv.hideWithoutAnimation();
   } else if (e.keyCode == Blockly.utils.KeyCodes.TAB) {
+    this.setValue(this.getText());
     Blockly.WidgetDiv.hide();
     Blockly.DropDownDiv.hideWithoutAnimation();
     this.sourceBlock_.tab(this, !e.shiftKey);

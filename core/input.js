@@ -29,8 +29,16 @@ Blockly.Input = function(type, name, block, connection) {
   if (type != Blockly.DUMMY_INPUT && !name) {
     throw Error('Value inputs and statement inputs must have non-empty name.');
   }
+
   /** @type {number} */
-  this.type = type;
+ if (type == Blockly.INDENTED_VALUE) {
+    /** @type {number} */
+    this.type = Blockly.INPUT_VALUE;
+    /** @type {number} */
+    this.subtype = Blockly.INDENTED_VALUE;
+  } else {
+    this.type = type;
+  }
   /** @type {string} */
   this.name = name;
   /**
@@ -117,6 +125,11 @@ Blockly.Input.prototype.insertFieldAt = function(index, field, opt_name) {
   if (field.suffixField) {
     // Add any suffix.
     index = this.insertFieldAt(index, field.suffixField);
+  }
+
+  //If it's a COLLAPSE_TEXT input, hide it by default
+  if (opt_name === 'COLLAPSED_TEXT') {
+    this.sourceBlock_.getTitle_(opt_name).getRootElement().style.display = 'none';
   }
 
   if (this.sourceBlock_.rendered) {

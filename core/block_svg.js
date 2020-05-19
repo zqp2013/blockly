@@ -1576,7 +1576,7 @@ Blockly.BlockSvg.prototype.bumpNeighbours = function() {
     }
 
     var neighbours = connection.neighbours(Blockly.SNAP_RADIUS);
-    for (var j = 0, otherConnection; (otherConnection = neighbours[j]); j++) {
+    for (var j = 0, otherConnection; neighbours != null && (otherConnection = neighbours[j]); j++) {
 
       // If both connections are connected, that's probably fine.  But if
       // either one of them is unconnected, then there could be confusion.

@@ -1,6 +1,12 @@
 // This file was automatically generated.  Do not modify.
 
 'use strict';
+goog.provide('Blockly.Msg.sv');
+
+goog.require('Blockly.Msg');
+
+Blockly.Msg.sv.switch_blockly_language_to_sv = {
+init: function() {
 
 Blockly.Msg["ADD_COMMENT"] = "Lägg till kommentar";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "Kan inte radera variabeln '%1' eftersom den är en del av definition för funktionen '%2'";
@@ -432,3 +438,5 @@ Blockly.Msg["TEXTS_HUE"] = "160";
 Blockly.Msg["PROCEDURES_HUE"] = "290";
 Blockly.Msg["COLOUR_HUE"] = "20";
 Blockly.Msg["VARIABLES_DYNAMIC_HUE"] = "310";
+}
+};

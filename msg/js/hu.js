@@ -2,6 +2,13 @@
 
 'use strict';
 
+goog.provide('Blockly.Msg.hu');
+
+goog.require('Blockly.Msg');
+
+Blockly.Msg.hu.switch_blockly_language_to_hu = {
+init: function() {
+
 Blockly.Msg["ADD_COMMENT"] = "Megjegyzés hozzáadása";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "A(z) „%1” változó nem törölhető, mert része a(z) „%2” függvény definíciójának.";
 Blockly.Msg["CHANGE_VALUE_TITLE"] = "Érték módosítása:";
@@ -432,3 +439,5 @@ Blockly.Msg["TEXTS_HUE"] = "160";
 Blockly.Msg["PROCEDURES_HUE"] = "290";
 Blockly.Msg["COLOUR_HUE"] = "20";
 Blockly.Msg["VARIABLES_DYNAMIC_HUE"] = "310";
+}
+};

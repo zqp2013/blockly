@@ -284,7 +284,7 @@ Blockly.Mutator.prototype.setVisible = function(visible) {
   Blockly.Events.fire(
       new Blockly.Events.Ui(this.block_, 'mutatorOpen', !visible, visible));
   if (visible) {
-    Blockly.Field.startCache();
+    //Blockly.Field.startCache();
     Blockly.Events.disable();
     // Create the bubble.
     this.bubble_ = new Blockly.Bubble(
@@ -335,7 +335,7 @@ Blockly.Mutator.prototype.setVisible = function(visible) {
     this.workspace_.addChangeListener(this.workspaceChanged_.bind(this));
     this.applyColour();
     Blockly.Events.enable();
-    Blockly.Field.stopCache();
+    //Blockly.Field.stopCache();
   } else {
     // Dispose of the bubble.
     this.svgDialog_ = null;

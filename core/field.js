@@ -257,8 +257,7 @@ Blockly.Field.prototype.setSourceBlock = function(block) {
  *     provider.
  */
 Blockly.Field.prototype.getConstants = function() {
-  if (!this.constants_ && this.sourceBlock_ && this.sourceBlock_.workspace &&
-      this.sourceBlock_.workspace.rendered) {
+  if (this.sourceBlock_ && this.sourceBlock_.workspace) {
     this.constants_ = this.sourceBlock_.workspace.getRenderer().getConstants();
   }
   return this.constants_;
@@ -840,15 +839,15 @@ Blockly.Field.prototype.setValue = function(newValue) {
     return;
   }
 
-  var validatedValue = this.doClassValidation_(newValue);
+  /*var validatedValue = this.doClassValidation_(newValue);
   // Class validators might accidentally forget to return, we'll ignore that.
   newValue = this.processValidation_(newValue, validatedValue);
   if (newValue instanceof Error) {
     doLogging && console.log('invalid class validation, return');
     return;
-  }
+  }*/
 
-  var localValidator = this.getValidator();
+  /*var localValidator = this.getValidator();
   if (localValidator) {
     validatedValue = localValidator.call(this, newValue);
     // Local validators might accidentally forget to return, we'll ignore that.
@@ -857,7 +856,7 @@ Blockly.Field.prototype.setValue = function(newValue) {
       doLogging && console.log('invalid local validation, return');
       return;
     }
-  }
+  }*/
   var oldValue = this.getValue();
   if (oldValue === newValue) {
     doLogging && console.log('same, return');

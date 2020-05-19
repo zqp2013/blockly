@@ -1,7 +1,12 @@
 // This file was automatically generated.  Do not modify.
 
 'use strict';
+goog.provide('Blockly.Msg.ko');
 
+goog.require('Blockly.Msg');
+
+Blockly.Msg.ko.switch_blockly_language_to_ko = {
+init: function() {
 Blockly.Msg["ADD_COMMENT"] = "주석 추가";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "'%2' 함수 정의의 일부이기 때문에 '%1' 변수를 삭제할 수 없습니다";
 Blockly.Msg["CHANGE_VALUE_TITLE"] = "값 바꾸기:";
@@ -432,3 +437,5 @@ Blockly.Msg["TEXTS_HUE"] = "160";
 Blockly.Msg["PROCEDURES_HUE"] = "290";
 Blockly.Msg["COLOUR_HUE"] = "20";
 Blockly.Msg["VARIABLES_DYNAMIC_HUE"] = "310";
+}
+};

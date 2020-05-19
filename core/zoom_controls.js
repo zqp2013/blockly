@@ -262,7 +262,7 @@ Blockly.ZoomControls.prototype.createZoomInSvg_ = function(rnd) {
       this.zoomInGroup_);
   zoominSvg.setAttributeNS(Blockly.utils.dom.XLINK_NS, 'xlink:href',
       ws.options.pathToMedia + Blockly.SPRITE.url);
-  zoomoinSvg.setAttribute('class', 'blocklyZoomButton');
+  zoominSvg.setAttribute('class', 'blocklyZoomButton');
   // Attach listener.
   Blockly.bindEventWithChecks_(zoominSvg, 'mousedown', null, function(e) {
     ws.markFocused();

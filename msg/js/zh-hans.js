@@ -1,7 +1,12 @@
 // This file was automatically generated.  Do not modify.
 
 'use strict';
+goog.provide('Blockly.Msg.zh.hans');
 
+goog.require('Blockly.Msg');
+
+Blockly.Msg.zh.hans.switch_blockly_language_to_zh_hans = {
+init: function() {
 Blockly.Msg["ADD_COMMENT"] = "添加注释";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "不能删除变量“%1”，因为它是函数“%2”定义的一部分";
 Blockly.Msg["CHANGE_VALUE_TITLE"] = "更改值：";
@@ -432,3 +437,5 @@ Blockly.Msg["TEXTS_HUE"] = "160";
 Blockly.Msg["PROCEDURES_HUE"] = "290";
 Blockly.Msg["COLOUR_HUE"] = "20";
 Blockly.Msg["VARIABLES_DYNAMIC_HUE"] = "310";
+}
+};

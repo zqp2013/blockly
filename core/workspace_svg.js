@@ -1861,7 +1861,7 @@ Blockly.WorkspaceSvg.prototype.markFocused = function() {
     // We call e.preventDefault in many event handlers which means we
     // need to explicitly grab focus (e.g from a textarea) because
     // the browser will not do it for us.  How to do this is browser dependent.
-    this.setBrowserFocus();
+    //this.setBrowserFocus();
   }
 };
 

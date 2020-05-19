@@ -1,7 +1,12 @@
 // This file was automatically generated.  Do not modify.
 
 'use strict';
+goog.provide('Blockly.Msg.en');
 
+goog.require('Blockly.Msg');
+
+Blockly.Msg.en.switch_blockly_language_to_en = {
+init: function() {
 Blockly.Msg["ADD_COMMENT"] = "Add Comment";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "Can't delete the variable '%1' because it's part of the definition of the function '%2'";
 Blockly.Msg["CHANGE_VALUE_TITLE"] = "Change value:";
@@ -432,3 +437,6 @@ Blockly.Msg["TEXTS_HUE"] = "160";
 Blockly.Msg["PROCEDURES_HUE"] = "290";
 Blockly.Msg["COLOUR_HUE"] = "20";
 Blockly.Msg["VARIABLES_DYNAMIC_HUE"] = "310";
+
+}
+};

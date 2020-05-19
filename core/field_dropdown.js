@@ -284,7 +284,7 @@ Blockly.FieldDropdown.prototype.showEditor_ = function(opt_e) {
   }
 
   Blockly.DropDownDiv.showPositionedByField(
-      this, this.dropdownDispose_.bind(this));
+     this, this.dropdownDispose_.bind(this));
 
   // Focusing needs to be handled after the menu is rendered and positioned.
   // Otherwise it will cause a page scroll to get the misplaced menu in

@@ -371,9 +371,11 @@ Blockly.init_ = function(mainWorkspace) {
 
   var verticalSpacing = Blockly.Scrollbar.scrollbarThickness;
   if (options.hasTrashcan) {
+    if (!mainWorkspace.trashcan) mainWorkspace.addTrashcan();
     verticalSpacing = mainWorkspace.trashcan.init(verticalSpacing);
   }
   if (options.zoomOptions && options.zoomOptions.controls) {
+    if (!mainWorkspace.zoomControls_) mainWorkspace.addZoomControls();
     mainWorkspace.zoomControls_.init(verticalSpacing);
   }
 

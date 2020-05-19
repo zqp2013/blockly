@@ -88,7 +88,7 @@ Blockly.RenderedConnection.TrackedState = {
  */
 Blockly.RenderedConnection.prototype.dispose = function() {
   Blockly.RenderedConnection.superClass_.dispose.call(this);
-  if (this.trackedState_ == Blockly.RenderedConnection.TrackedState.TRACKED) {
+  if (this.trackedState_ == Blockly.RenderedConnection.TrackedState.TRACKED && this.db_) {
     this.db_.removeConnection(this, this.y);
   }
 };
@@ -134,7 +134,7 @@ Blockly.RenderedConnection.prototype.distanceFrom = function(otherConnection) {
  * @package
  */
 Blockly.RenderedConnection.prototype.bumpAwayFrom = function(staticConnection) {
-  if (this.sourceBlock_.workspace.isDragging()) {
+  if (this.sourceBlock_.workspace && this.sourceBlock_.workspace.isDragging()) {
     // Don't move blocks around while the user is doing the same.
     return;
   }
@@ -181,11 +181,11 @@ Blockly.RenderedConnection.prototype.bumpAwayFrom = function(staticConnection) {
  * @param {number} y New absolute y coordinate, in workspace coordinates.
  */
 Blockly.RenderedConnection.prototype.moveTo = function(x, y) {
-  if (this.trackedState_ == Blockly.RenderedConnection.TrackedState.WILL_TRACK) {
+  if (this.trackedState_ == Blockly.RenderedConnection.TrackedState.WILL_TRACK && this.db_) {
     this.db_.addConnection(this, y);
     this.trackedState_ = Blockly.RenderedConnection.TrackedState.TRACKED;
   } else if (this.trackedState_ == Blockly.RenderedConnection
-      .TrackedState.TRACKED) {
+      .TrackedState.TRACKED && this.db_) {
     this.db_.removeConnection(this, this.y);
     this.db_.addConnection(this, y);
   }
@@ -264,7 +264,8 @@ Blockly.RenderedConnection.prototype.tighten = function() {
  *     and 'radius' which is the distance.
  */
 Blockly.RenderedConnection.prototype.closest = function(maxLimit, dxy) {
-  return this.dbOpposite_.searchForClosest(this, maxLimit, dxy);
+  if (this.dbOpposite_)
+    return this.dbOpposite_.searchForClosest(this, maxLimit, dxy);
 };
 
 /**
@@ -329,12 +330,12 @@ Blockly.RenderedConnection.prototype.setTracking = function(doTracking) {
     // Don't bother maintaining a database of connections in a flyout.
     return;
   }
-  if (doTracking) {
+  if (doTracking && this.db_) {
     this.db_.addConnection(this, this.y);
     this.trackedState_ = Blockly.RenderedConnection.TrackedState.TRACKED;
     return;
   }
-  if (this.trackedState_ == Blockly.RenderedConnection.TrackedState.TRACKED) {
+  if (this.trackedState_ == Blockly.RenderedConnection.TrackedState.TRACKED && this.db_) {
     this.db_.removeConnection(this, this.y);
   }
   this.trackedState_ = Blockly.RenderedConnection.TrackedState.UNTRACKED;
@@ -489,7 +490,8 @@ Blockly.RenderedConnection.prototype.respawnShadow_ = function() {
  * @package
  */
 Blockly.RenderedConnection.prototype.neighbours = function(maxLimit) {
-  return this.dbOpposite_.getNeighbours(this, maxLimit);
+  if (this.dbOpposite_)
+    return this.dbOpposite_.getNeighbours(this, maxLimit);
 };
 
 /**

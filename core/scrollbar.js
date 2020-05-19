@@ -513,7 +513,7 @@ Blockly.Scrollbar.prototype.resizeContentHorizontal = function(hostMetrics) {
   this.setHandleLength_(Math.max(0, handleLength));
 
   var handlePosition = (hostMetrics.viewLeft - hostMetrics.contentLeft) *
-      this.ratio_;
+     this.ratio_;
   this.setHandlePosition(this.constrainHandle_(handlePosition));
 };
 

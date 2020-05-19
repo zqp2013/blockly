@@ -146,7 +146,7 @@ Blockly.WidgetDiv.hideIfOwner = function(oldOwner) {
 Blockly.WidgetDiv.positionInternal_ = function(x, y, height) {
   Blockly.WidgetDiv.DIV.style.left = x + 'px';
   Blockly.WidgetDiv.DIV.style.top = y + 'px';
-  Blockly.WidgetDiv.DIV.style.height = (height - y) + 'px';
+  Blockly.WidgetDiv.DIV.style.height = height + 'px';
 };
 
 /**

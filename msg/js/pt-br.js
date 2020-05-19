@@ -2,6 +2,13 @@
 
 'use strict';
 
+goog.provide('Blockly.Msg.pt.br');
+
+goog.require('Blockly.Msg');
+
+Blockly.Msg.pt.br.switch_blockly_language_to_pt_br = {
+init: function() {
+
 Blockly.Msg["ADD_COMMENT"] = "Adicionar comentário";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "Não se pode deletar a variável '%1' porque é parte da definição da função '%2'";
 Blockly.Msg["CHANGE_VALUE_TITLE"] = "Mudar valor:";
@@ -432,3 +439,5 @@ Blockly.Msg["TEXTS_HUE"] = "160";
 Blockly.Msg["PROCEDURES_HUE"] = "290";
 Blockly.Msg["COLOUR_HUE"] = "20";
 Blockly.Msg["VARIABLES_DYNAMIC_HUE"] = "310";
+}
+};

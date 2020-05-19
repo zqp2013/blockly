@@ -535,7 +535,7 @@ Blockly.Flyout.prototype.show = function(xmlList) {
   }
 
   this.workspace_.rendered = true;
-  var blocks = Blockly.utils.object.getValues(this.workspace_.blockDB_);
+  var blocks = Blockly.utils.object.values(this.workspace_.blockDB_);
   for (var i = 0; i < blocks.length; i++) {
     blocks[i].initSvg();
   }
@@ -682,7 +682,7 @@ Blockly.Flyout.prototype.createBlock = function(originalBlock) {
     newBlock = this.placeNewBlock_(originalBlock);
     if (this.autoClose) {
       // save this block as the last created block for this instantiation of the flyout
-      this.lastBlockCreated = block;
+      this.lastBlockCreated = newBlock;
     }
     // Close the flyout.
     Blockly.hideChaff();

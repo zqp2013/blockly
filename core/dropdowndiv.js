@@ -338,7 +338,8 @@ Blockly.DropDownDiv.show = function(owner, rtl, primaryX, primaryY,
   Blockly.DropDownDiv.onHide_ = opt_onHide || null;
   // Set direction.
   var div = Blockly.DropDownDiv.DIV_;
-  div.style.direction = rtl ? 'rtl' : 'ltr';
+  if (div)
+    div.style.direction = rtl ? 'rtl' : 'ltr';
 
   Blockly.DropDownDiv.rendererClassName_ =
       Blockly.getMainWorkspace().getRenderer().getClassName();
@@ -626,13 +627,15 @@ Blockly.DropDownDiv.hideWithoutAnimation = function() {
   // Reset style properties in case this gets called directly
   // instead of hide() - see discussion on #2551.
   var div = Blockly.DropDownDiv.DIV_;
-  div.style.transform = '';
-  div.style.left = '';
-  div.style.top = '';
-  div.style.opacity = 0;
-  div.style.display = 'none';
-  div.style.backgroundColor = '';
-  div.style.borderColor = '';
+  if (div) {
+    div.style.transform = '';
+    div.style.left = '';
+    div.style.top = '';
+    div.style.opacity = 0;
+    div.style.display = 'none';
+    div.style.backgroundColor = '';
+    div.style.borderColor = '';
+  }
 
   if (Blockly.DropDownDiv.onHide_) {
     Blockly.DropDownDiv.onHide_();

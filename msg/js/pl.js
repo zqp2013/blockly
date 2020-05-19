@@ -2,6 +2,13 @@
 
 'use strict';
 
+goog.provide('Blockly.Msg.pl');
+
+goog.require('Blockly.Msg');
+
+Blockly.Msg.pl.switch_blockly_language_to_pl = {
+init: function() {
+
 Blockly.Msg["ADD_COMMENT"] = "Dodaj Komentarz";
 Blockly.Msg["CANNOT_DELETE_VARIABLE_PROCEDURE"] = "Nie można usunąć zmiennej '%1', ponieważ jest częścią definicji funkcji '%2'";
 Blockly.Msg["CHANGE_VALUE_TITLE"] = "Zmień wartość:";
@@ -432,3 +439,5 @@ Blockly.Msg["TEXTS_HUE"] = "160";
 Blockly.Msg["PROCEDURES_HUE"] = "290";
 Blockly.Msg["COLOUR_HUE"] = "20";
 Blockly.Msg["VARIABLES_DYNAMIC_HUE"] = "310";
+}
+};

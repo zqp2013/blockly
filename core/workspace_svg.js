@@ -1326,7 +1326,7 @@ Blockly.WorkspaceSvg.prototype.pasteBlock_ = function(xmlBlock) {
           for (var i = 0, connection; (connection = connections[i]); i++) {
             var neighbour = connection.closest(Blockly.SNAP_RADIUS,
                 new Blockly.utils.Coordinate(blockX, blockY));
-            if (neighbour.connection) {
+            if (neighbour && neighbour.connection) {
               collide = true;
               break;
             }

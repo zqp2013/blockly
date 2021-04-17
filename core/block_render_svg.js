@@ -362,11 +362,13 @@ Blockly.BlockSvg.prototype.renderCompute_ = function(iconWidth) {
     var row;
     if (!isInline || !lastType ||
         lastType == Blockly.NEXT_STATEMENT ||
-        input.type == Blockly.NEXT_STATEMENT) {
+        input.type == Blockly.NEXT_STATEMENT ||
+        input.subtype == Blockly.INDENTED_VALUE) {
       // Create new row.
       lastType = input.type;
       row = [];
-      if (isInline && input.type != Blockly.NEXT_STATEMENT) {
+      if (isInline && input.type != Blockly.NEXT_STATEMENT &&
+        input.subtype != Blockly.INDENTED_VALUE) {
         row.type = Blockly.BlockSvg.INLINE;
       } else if (input.subtype) {
         row.type = input.type;
@@ -384,7 +386,8 @@ Blockly.BlockSvg.prototype.renderCompute_ = function(iconWidth) {
     // Compute minimum input size.
     input.renderHeight = Blockly.BlockSvg.MIN_BLOCK_Y;
     // The width is currently only needed for inline value inputs.
-    if (isInline && input.type == Blockly.INPUT_VALUE) {
+    if (isInline && input.type == Blockly.INPUT_VALUE &&
+      input.subtype !== Blockly.INDENTED_VALUE) {
       input.renderWidth = Blockly.BlockSvg.TAB_WIDTH +
           Blockly.BlockSvg.SEP_SPACE_X * 1.25;
     } else {
@@ -765,26 +768,35 @@ Blockly.BlockSvg.prototype.renderDrawRight_ = function(steps, highlightSteps,
         cursorX = inputRows.statementEdge;
         steps.push('H', cursorX + input.fieldWidth + Blockly.BlockSvg.TAB_WIDTH);
         steps.push(Blockly.BlockSvg.TAB_PATH_DOWN);
-        steps.push('V', cursorY + row.height + 1);
-        steps.push('H', inputRows.rightEdge);
-        steps.push('v', Blockly.BlockSvg.SEP_SPACE_Y);
-        if (this.RTL) {
-          highlightSteps.push('M',
-              (cursorX - Blockly.BlockSvg.NOTCH_WIDTH +
-                  Blockly.BlockSvg.DISTANCE_45_OUTSIDE) +
-                  ',' + (cursorY + Blockly.BlockSvg.DISTANCE_45_OUTSIDE));
-          highlightSteps.push(
-              Blockly.BlockSvg.INNER_TOP_LEFT_CORNER_HIGHLIGHT_RTL);
-          highlightSteps.push('v',
-              row.height - 2 * Blockly.BlockSvg.CORNER_RADIUS);
-          highlightSteps.push(
-              Blockly.BlockSvg.INNER_BOTTOM_LEFT_CORNER_HIGHLIGHT_RTL);
-          highlightSteps.push('H', inputRows.rightEdge - 1);
+
+        if (y !== inputRows.length - 1) {
+          steps.push('v', row.height - Blockly.BlockSvg.TAB_HEIGHT);
         } else {
-          highlightSteps.push('M',
+          steps.push('V', cursorY + row.height + 1);
+          steps.push('H', inputRows.rightEdge);
+        }
+
+        if (y === inputRows.length - 1) {
+          steps.push('v', Blockly.BlockSvg.SEP_SPACE_Y);
+
+          if (this.RTL) {
+            highlightSteps.push('M',
+              (cursorX - Blockly.BlockSvg.NOTCH_WIDTH +
+                Blockly.BlockSvg.DISTANCE_45_OUTSIDE) +
+              ',' + (cursorY + Blockly.BlockSvg.DISTANCE_45_OUTSIDE));
+            highlightSteps.push(
+              Blockly.BlockSvg.INNER_TOP_LEFT_CORNER_HIGHLIGHT_RTL);
+            highlightSteps.push('v',
+              row.height - 2 * Blockly.BlockSvg.CORNER_RADIUS);
+            highlightSteps.push(
+              Blockly.BlockSvg.INNER_BOTTOM_LEFT_CORNER_HIGHLIGHT_RTL);
+            highlightSteps.push('H', inputRows.rightEdge - 1);
+          } else {
+            highlightSteps.push('M',
               (cursorX + 9 + input.fieldWidth) + ',' +
-                  (cursorY + row.height + Blockly.BlockSvg.DISTANCE_45_OUTSIDE));
-          highlightSteps.push('H', inputRows.rightEdge);
+              (cursorY + row.height + Blockly.BlockSvg.DISTANCE_45_OUTSIDE));
+            highlightSteps.push('H', inputRows.rightEdge);
+          }
         }
       } else {
         steps.push(Blockly.BlockSvg.TAB_PATH_DOWN);
@@ -819,7 +831,7 @@ Blockly.BlockSvg.prototype.renderDrawRight_ = function(steps, highlightSteps,
             input.connection.targetBlock().getHeightWidth().width -
             Blockly.BlockSvg.TAB_WIDTH + 1);
       }
-      if (row.subtype == Blockly.INDENTED_VALUE) {
+      if (row.subtype == Blockly.INDENTED_VALUE && y == inputRows.length - 1) {
         cursorY += Blockly.BlockSvg.SEP_SPACE_Y + 1;
       }
     } else if (row.type == Blockly.DUMMY_INPUT) {

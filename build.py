@@ -183,141 +183,60 @@ class Gen_compressed(threading.Thread):
 
   def gen_core(self):
     target_filename = "blockly_compressed.js"
-    # Define the parameters for the POST request.
-    params = [
-        ("compilation_level", "SIMPLE_OPTIMIZATIONS"),
-        ("use_closure_library", "true"),
-        ("output_format", "json"),
-        ("output_info", "compiled_code"),
-        ("output_info", "warnings"),
-        ("output_info", "errors"),
-        ("output_info", "statistics"),
-      ]
 
     # Read in all the source files.
     filenames = calcdeps.CalculateDependencies(self.search_paths,
         [os.path.join("core", "blockly.js")])
-    for filename in filenames:
-      # Filter out the Closure files (the compiler will add them).
-      if filename.startswith(os.pardir + os.sep):  # '../'
-        continue
-      f = open(filename)
-      params.append(("js_code", "".join(f.readlines())))
-      f.close()
 
-    self.do_compile(params, target_filename, filenames, "")
+    self.do_compile(target_filename, filenames, "")
 
   def gen_blocks(self):
     target_filename = "blocks_compressed.js"
-    # Define the parameters for the POST request.
-    params = [
-        ("compilation_level", "SIMPLE_OPTIMIZATIONS"),
-        ("output_format", "json"),
-        ("output_info", "compiled_code"),
-        ("output_info", "warnings"),
-        ("output_info", "errors"),
-        ("output_info", "statistics"),
-      ]
 
     # Read in all the source files.
-    # Add Blockly.Blocks to be compatible with the compiler.
-    params.append(("js_code", "goog.provide('Blockly.Blocks');"))
     filenames = glob.glob(os.path.join("blocks", "*.js"))
-    for filename in filenames:
-      f = open(filename)
-      params.append(("js_code", "".join(f.readlines())))
-      f.close()
 
     # Remove Blockly.Blocks to be compatible with Blockly.
     remove = "var Blockly={Blocks:{}};"
-    self.do_compile(params, target_filename, filenames, remove)
+    self.do_compile(target_filename, filenames, remove)
 
   def gen_generator(self, language):
     target_filename = language + "_compressed.js"
-    # Define the parameters for the POST request.
-    params = [
-        ("compilation_level", "SIMPLE_OPTIMIZATIONS"),
-        ("output_format", "json"),
-        ("output_info", "compiled_code"),
-        ("output_info", "warnings"),
-        ("output_info", "errors"),
-        ("output_info", "statistics"),
-      ]
 
     # Read in all the source files.
     # Add Blockly.Generator to be compatible with the compiler.
-    params.append(("js_code", "goog.provide('Blockly.Generator');"))
     filenames = glob.glob(
         os.path.join("generators", language, "*.js"))
     filenames.insert(0, os.path.join("generators", language + ".js"))
-    for filename in filenames:
-      f = open(filename)
-      params.append(("js_code", "".join(f.readlines())))
-      f.close()
-    filenames.insert(0, "[goog.provide]")
 
     # Remove Blockly.Generator to be compatible with Blockly.
     remove = "var Blockly={Generator:{}};"
-    self.do_compile(params, target_filename, filenames, remove)
+    self.do_compile(target_filename, filenames, remove)
 
-  def do_compile(self, params, target_filename, filenames, remove):
-    # Send the request to Google.
-    headers = {"Content-type": "application/x-www-form-urlencoded"}
-    conn = httplib.HTTPConnection("closure-compiler.appspot.com")
-    conn.request("POST", "/compile", urllib.urlencode(params), headers)
-    response = conn.getresponse()
-    json_str = response.read()
-    conn.close()
+  def do_compile(self, target_filename, filenames, remove):
+    cmd = [
+      'java',
+      '-jar', './closure-compiler.jar',
+      '--compilation_level', 'SIMPLE_OPTIMIZATIONS',
+      '--language_out', 'ECMASCRIPT5',
+      '--warning_level', 'QUIET',
+    ] + filenames
 
-    # Parse the JSON response.
-    json_data = json.loads(json_str)
+    try:
+      proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    except:
+      print("Failed to Popen: %s" % cmd)
+      raise
+    code = readStdout(proc)
+    code = ''.join(code)
 
-    def file_lookup(name):
-      if not name.startswith("Input_"):
-        return "???"
-      n = int(name[6:]) - 1
-      return filenames[n]
+    code = HEADER + "\n" + code
+    code = code.replace(remove, "")
 
-    if json_data.has_key("serverErrors"):
-      errors = json_data["serverErrors"]
-      for error in errors:
-        print("SERVER ERROR: %s" % target_filename)
-        print(error["error"])
-    elif json_data.has_key("errors"):
-      errors = json_data["errors"]
-      for error in errors:
-        print("FATAL ERROR")
-        print(error["error"])
-        if error["file"]:
-          print("%s at line %d:" % (
-              file_lookup(error["file"]), error["lineno"]))
-          print(error["line"])
-          print((" " * error["charno"]) + "^")
-        sys.exit(1)
-    else:
-      if json_data.has_key("warnings"):
-        warnings = json_data["warnings"]
-        for warning in warnings:
-          print("WARNING")
-          print(warning["warning"])
-          if warning["file"]:
-            print("%s at line %d:" % (
-                file_lookup(warning["file"]), warning["lineno"]))
-            print(warning["line"])
-            print((" " * warning["charno"]) + "^")
-        print()
-
-      if not json_data.has_key("compiledCode"):
-        print("FATAL ERROR: Compiler did not return compiledCode.")
-        sys.exit(1)
-
-      code = HEADER + "\n" + json_data["compiledCode"]
-      code = code.replace(remove, "")
-
-      # Trim down Google's Apache licences.
-      # The Closure Compiler used to preserve these until August 2015.
-      # Delete this in a few months if the licences don't return.
-      LICENSE = re.compile("""/\\*
+    # Trim down Google's Apache licences.
+    # The Closure Compiler used to preserve these until August 2015.
+    # Delete this in a few months if the licences don't return.
+    LICENSE = re.compile("""/\\*
 
  [\w ]+
 
@@ -336,24 +255,12 @@ class Gen_compressed(threading.Thread):
  See the License for the specific language governing permissions and
  limitations under the License.
 \\*/""")
-      code = re.sub(LICENSE, r"\n// \1  Apache License 2.0", code)
+    code = re.sub(LICENSE, r"\n// \1  Apache License 2.0", code)
 
-      stats = json_data["statistics"]
-      original_b = stats["originalSize"]
-      compressed_b = stats["compressedSize"]
-      if original_b > 0 and compressed_b > 0:
-        f = open(target_filename, "w")
-        f.write(code)
-        f.close()
-
-        original_kb = int(original_b / 1024 + 0.5)
-        compressed_kb = int(compressed_b / 1024 + 0.5)
-        ratio = int(float(compressed_b) / float(original_b) * 100 + 0.5)
-        print("SUCCESS: " + target_filename)
-        print("Size changed from %d KB to %d KB (%d%%)." % (
-            original_kb, compressed_kb, ratio))
-      else:
-        print("UNKNOWN ERROR")
+    f = open(target_filename, "w")
+    f.write(code)
+    f.close()
+    print("SUCCESS: " + target_filename)
 
 
 class Gen_langfiles(threading.Thread):
@@ -432,6 +339,12 @@ class Gen_langfiles(threading.Thread):
       else:
         print("FAILED to create " + f)
 
+def readStdout(proc):
+  data = proc.stdout.readlines()
+  # Python 2 reads stdout as text.
+  # Python 3 reads stdout as bytes.
+  return list(map(lambda line:
+      type(line) == str and line or str(line, 'utf-8'), data))
 
 if __name__ == "__main__":
   try:
@@ -461,7 +374,7 @@ developers.google.com/blockly/guides/modify/web/closure""")
   # Run both tasks in parallel threads.
   # Uncompressed is limited by processor speed.
   # Compressed is limited by network and server speed.
-  Gen_uncompressed(search_paths).start()
+  # Gen_uncompressed(search_paths).start()
   Gen_compressed(search_paths).start()
 
   # This is run locally in a separate thread.

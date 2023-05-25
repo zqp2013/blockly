@@ -45,10 +45,6 @@ export function inject(
   } else {
     containerElement = container;
   }
-  // Verify that the container is in document.
-  if (!document.contains(containerElement)) {
-    throw Error('Error: container is not in current document');
-  }
   const options = new Options(opt_options || ({} as BlocklyOptions));
   const subContainer = document.createElement('div');
   subContainer.className = 'injectionDiv';

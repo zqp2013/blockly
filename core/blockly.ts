@@ -221,6 +221,7 @@ import {WorkspaceDragger} from './workspace_dragger.js';
 import {WorkspaceSvg} from './workspace_svg.js';
 import * as Xml from './xml.js';
 import {ZoomControls} from './zoom_controls.js';
+import {Icon as OldIcon} from './icon_old.js';
 
 /**
  * Blockly core version.
@@ -658,3 +659,4 @@ export const connectionTypes = ConnectionType;
 export {inject};
 export {inputTypes};
 export {serialization};
+export {OldIcon};

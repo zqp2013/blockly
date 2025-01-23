@@ -772,7 +772,7 @@ Blockly.Css.CONTENT = [
   '.blocklyWidgetDiv .goog-menu {',
     'background: #fff;',
     'border: 1px solid transparent;',
-    'box-shadow: 0 0 3px 1px rgba(0, 0, 0, .3);',
+    'box-shadow: 0 0 5px 1px rgba(0, 0, 0, .3);',
     'font: normal 13px Arial, sans-serif;',
     'margin: 0;',
     'outline: none;',

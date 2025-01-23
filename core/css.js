@@ -536,6 +536,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyZoom>image {',
     'opacity: 0.9;',
+    'filter: invert(50%);', /*add by 中文网：适配黑色背景 */
   '}',
 
   '.blocklyZoom>image:hover {',
@@ -770,10 +771,8 @@ Blockly.Css.CONTENT = [
 
   '.blocklyWidgetDiv .goog-menu {',
     'background: #fff;',
-    'border-color: #ccc #666 #666 #ccc;',
-    'border-style: solid;',
-    'border-width: 1px;',
-    'cursor: default;',
+    'border: 1px solid transparent;',
+    'box-shadow: 0 0 3px 1px rgba(0, 0, 0, .3);',
     'font: normal 13px Arial, sans-serif;',
     'margin: 0;',
     'outline: none;',
@@ -782,7 +781,7 @@ Blockly.Css.CONTENT = [
     'overflow-y: auto;',
     'overflow-x: hidden;',
     'max-height: 100%;',
-    'z-index: 20000;',  /* Arbitrary, but some apps depend on it... */
+    'z-index: 20000;',  /* modify by 中文网：右键菜单，风格更现代化 */
   '}',
 
   /* Copied from: goog/css/menuitem.css */
@@ -820,7 +819,9 @@ Blockly.Css.CONTENT = [
     'list-style: none;',
     'margin: 0;',
      /* 28px on the left for icon or checkbox; 7em on the right for shortcut. */
-    'padding: 4px 7em 4px 28px;',
+    /*'padding: 4px 7em 4px 28px;', modify by 中文网：右键菜单 */
+    'padding: 6px 3em 6px 15px;',
+    'min-width: 7em;',
     'white-space: nowrap;',
   '}',
 
@@ -866,14 +867,7 @@ Blockly.Css.CONTENT = [
   /* State: hover. */
   '.blocklyWidgetDiv .goog-menuitem-highlight,',
   '.blocklyWidgetDiv .goog-menuitem-hover {',
-    'background-color: #d6e9f8;',
-     /* Use an explicit top and bottom border so that the selection is visible',
-      * in high contrast mode. */
-    'border-color: #d6e9f8;',
-    'border-style: dotted;',
-    'border-width: 1px 0;',
-    'padding-bottom: 3px;',
-    'padding-top: 3px;',
+    'background-color: rgba(0,0,0,.1);', /*modify by 中文网：右键菜单，样式优化*/
   '}',
 
   /* State: selected/checked. */

@@ -177,6 +177,7 @@ Blockly.Trashcan.prototype.createDom = function() {
   var body = Blockly.utils.createSvgElement('image',
       {'width': Blockly.SPRITE.width, 'x': -this.SPRITE_LEFT_,
        'height': Blockly.SPRITE.height, 'y': -this.SPRITE_TOP_,
+       'style': 'filter: invert(50%);', /*add by 中文网：适配黑色背景 */
        'clip-path': 'url(#blocklyTrashBodyClipPath' + rnd + ')'},
       this.svgGroup_);
   body.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
@@ -190,6 +191,7 @@ Blockly.Trashcan.prototype.createDom = function() {
   this.svgLid_ = Blockly.utils.createSvgElement('image',
       {'width': Blockly.SPRITE.width, 'x': -this.SPRITE_LEFT_,
        'height': Blockly.SPRITE.height, 'y': -this.SPRITE_TOP_,
+       'style': 'filter: invert(50%);', /*add by 中文网：适配黑色背景 */
        'clip-path': 'url(#blocklyTrashLidClipPath' + rnd + ')'},
       this.svgGroup_);
   this.svgLid_.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
